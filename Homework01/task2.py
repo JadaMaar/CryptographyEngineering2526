@@ -170,6 +170,9 @@ def tls_handshake():
     derived_key_server = derive_key_from_shared_secret(server_shared_secret, salt)
     derived_key_client = derive_key_from_shared_secret(client_shared_secret, salt)
 
+    print(f"Derived Symmetric Key (hex) of Client: {derived_key_client.hex()}")
+    print(f"Derived Symmetric Key (hex) of Server: {derived_key_server.hex()}")
+
     assert server_shared_secret == client_shared_secret, "Shared secrets do not match!"
     assert derived_key_server == derived_key_client, "Derived secrets do not match!"
 
@@ -185,12 +188,14 @@ def tls_handshake():
     message = f"{cert}||{sigma}||{mac_s}"
     associated_data = f"Alice, Bob, {pk_s_bytes}, {pk_c_bytes}".encode()
     iv, ciphertext, tag = aes_gcm_encrypt(server_ks1, message, associated_data)
+    print(f"Ciphertext (hex) encrypted by Server:\n IV = {iv.hex()},\n CT = {ciphertext.hex()},\n Tag = {tag.hex()}\n")
 
     # server sends AEAD(𝐾1𝑆,{𝑐𝑒𝑟𝑡[𝑝𝑘𝑆] , 𝜎𝑆 , mac𝑆}) = iv, cipertext, tag to the client
     client_kc1, client_ks1 = KeySchedul1(derived_key_client)
     client_kc2, client_ks2 = KeySchedul2(nonce_c, pk_c_bytes, nonce_s, pk_s_bytes, derived_key_server)
 
     client_decrypted_message = aes_gcm_decrypt(client_ks1, iv, ciphertext, associated_data, tag)
+    print(f"Message decrypted by Client: {client_decrypted_message}")
     #print(len(client_decrypted_message.split("||")))
     #print(client_decrypted_message)
     client_cert, client_sigma, client_mac_s = client_decrypted_message.split("||")
@@ -202,9 +207,11 @@ def tls_handshake():
 
     mac_c = hmac_sign(client_kc2, sha256(nonce_c + pk_c_bytes + nonce_s + pk_s_bytes + client_cert + b"ClientMAC").digest())
     iv, ciphertext, tag = aes_gcm_encrypt(client_kc1, mac_c.hex(), associated_data)
+    print(f"Ciphertext (hex) encrypted by Client:\n IV = {iv.hex()},\n CT = {ciphertext.hex()},\n Tag = {tag.hex()}\n")
 
     # client sends AEAD(𝐾1c,{macC}) = iv, cipertext, tag to the server
     server_decrypted_message = aes_gcm_decrypt(server_kc1, iv, ciphertext, associated_data, tag)
+    print(f"Message decrypted by Server: {server_decrypted_message}")
     server_mac_c = bytes.fromhex(server_decrypted_message)
     assert hmac_verify(server_kc2, sha256(nonce_c + pk_c_bytes + nonce_s + pk_s_bytes + cert + b"ClientMAC").digest(), server_mac_c) == True
 

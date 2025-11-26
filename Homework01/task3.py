@@ -110,7 +110,7 @@ def main():
 
     modulus = order_CURVE
     inverse_r_fixed = invert(r_fixed, modulus) % modulus
-    print(f"\nThe inverse of r_1 is: {inverse_r_fixed}")
+    print(f"\nThe inverse of r_1 is: {inverse_r_fixed}\n\n")
 
     # Example of Nonce-reuse attack
     nonce = 34117 % order_CURVE
