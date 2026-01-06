@@ -44,10 +44,11 @@ def pq_tls_handshake():
     # 4. Handshake key schedule (after ServerHello)
     # ============================================================
 
-    # TODO: change to be signed by CA
+    auth_pk, auth_sk = ML_DSA_44.keygen()
+
     # Long-term authentication key (certificate)
     pk_s, sk_s = ML_DSA_44.keygen()
-    cert = pk_s
+    cert = ML_DSA_44.sign(auth_sk, pk_s)
 
     kc1_s, ks1_s = KeySchedule1(server_shared_secret)
     kc1_c, ks1_c = KeySchedule1(client_shared_secret)
@@ -96,11 +97,12 @@ def pq_tls_handshake():
     # 6. Client processes server flight
     # ============================================================
     decrypted = aes_gcm_decrypt(ks1_c, iv, ct, aad, tag)
-    cert_c = decrypted[:1312]
-    sigma_c = decrypted[1312:3732]
-    mac_s_c = decrypted[3732:]
+    cert_c = decrypted[:2420]
+    sigma_c = decrypted[2420:4840]
+    mac_s_c = decrypted[4840:]
 
-    assert ML_DSA_44.verify(cert_c, transcript_hash, sigma_c)
+    assert ML_DSA_44.verify(pk_s, transcript_hash, sigma_c)
+    assert ML_DSA_44.verify(auth_pk, pk_s, cert_c)
     assert hmac_verify(
         ks2_c,
         sha256(nonce_c + pk_c + nonce_s + pk_s + sigma + cert + b"ServerMAC").digest(),
