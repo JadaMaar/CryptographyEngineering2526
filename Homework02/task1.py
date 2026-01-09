@@ -21,6 +21,7 @@ def pq_tls_handshake():
     pk_c, sk_c = ML_KEM_512.keygen()
 
     # Client sends: nonce_c, pk_c
+    print(f"client -> server\n nonce_c: {nonce_c} \n pk_c: {pk_c} \n")
 
 
     # ============================================================
@@ -31,6 +32,7 @@ def pq_tls_handshake():
     server_shared_secret, ct_kem = ML_KEM_512.encaps(pk_c)
 
     # Server sends: nonce_s, ct_kem
+    print(f"server -> client\n nonce_s: {nonce_s} \n ct_kem: {ct_kem} \n")
 
 
     # ============================================================
@@ -91,6 +93,7 @@ def pq_tls_handshake():
     iv, ct, tag = aes_gcm_encrypt(ks1_s, server_flight, aad)
 
     # Server sends: AEAD(ks1_s, {cert, sigma, mac_s})
+    print(f"server -> client\n iv: {iv} \n ct: {ct} \n tag: {tag}\n")
 
 
     # ============================================================
@@ -125,6 +128,7 @@ def pq_tls_handshake():
     )
 
     # Client sends: AEAD(kc1_c, mac_c)
+    print(f"client -> server\n iv: {iv} \n ct: {ct} \n tag: {tag}\n")
 
 
     # ============================================================
@@ -156,8 +160,8 @@ def pq_tls_handshake():
     assert kc3_c == kc3_s
     assert ks3_c == ks3_s
 
-    #print("✓ PQ-TLS handshake completed")
-    #print("✓ Application traffic keys established")
+    print("✓ PQ-TLS handshake completed")
+    print("✓ Application traffic keys established")
 
 
 

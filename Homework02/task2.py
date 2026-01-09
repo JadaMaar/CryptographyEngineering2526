@@ -12,6 +12,7 @@ def kem_tls_demo():
     # ==========================================
     # client sends nonce_c, ek to the server   |
     # ==========================================
+    print(f"client -> server\n nonce_c: {nonce_c}\n ek: {ek}\n")
 
     auth_pk, auth_sk = ML_DSA_44.keygen()
 
@@ -24,6 +25,7 @@ def kem_tls_demo():
     # ==========================================
     # server sends nonce_s, ct to the client   |
     # ==========================================
+    print(f"server -> client\n nonce_s: {nonce_s}\n ct: {ct1}\n")
 
     server_kc1, server_ks1 = KeySchedule1(server_K1)
     # server_kc2, server_ks2 = KeySchedule2(nonce_c, pk_c_bytes, nonce_s, pk_s_bytes, derived_key_server)
@@ -34,6 +36,7 @@ def kem_tls_demo():
     # ===============================================================
     # server sends iv, ciphertext, tag, server_pk_kem to the client |
     # ===============================================================
+    print(f"server -> client\n iv: {iv}\n ciphertext: {ciphertext}\n tag: {tag}\n server_pk_kem: {server_pk_kem}\n")
 
     client_K1 = ML_KEM_512.decaps(dk, ct1)
     assert server_K1 == client_K1
@@ -49,6 +52,7 @@ def kem_tls_demo():
     # ================================================
     # client sends iv, ciphertext, tag to the server |
     # ================================================
+    print(f"client -> server\n iv: {iv}\n ciphertext: {ciphertext}\n tag: {tag}\n")
 
     # server
     server_decrypted_message = aes_gcm_decrypt(server_kc1, iv, ciphertext, associated_data, tag)
@@ -64,6 +68,7 @@ def kem_tls_demo():
     # ================================================
     # client sends iv, ciphertext, tag to the server |
     # ================================================
+    print(f"client -> server\n iv: {iv}\n ciphertext: {ciphertext}\n tag: {tag}\n")
 
     server_K2c, server_K2s = KeySchedule2(nonce_c, ek, nonce_s, server_pk_kem, server_combined_keys)
     server_decrypted_message = aes_gcm_decrypt(server_K2c, iv, ciphertext, associated_data, tag)
@@ -78,6 +83,7 @@ def kem_tls_demo():
     # ================================================
     # server sends iv, ciphertext, tag to the client |
     # ================================================
+    print(f"server -> client\n iv: {iv}\n ciphertext: {ciphertext}\n tag: {tag}\n")
 
     client_decrypted_message = aes_gcm_decrypt(client_K2s, iv, ciphertext, associated_data, tag)
     server_mac_c = client_decrypted_message

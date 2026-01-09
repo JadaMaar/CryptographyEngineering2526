@@ -88,7 +88,7 @@ def KeySchedule3(nonce_c, X, nonce_s, Y, key, sigma, cert, mac_s):
     hs = DeriveHS(key)
     dHS = hkdf_expand(hs, sha256(b"DHS").digest())
     zero_bytes = b"\x00" * 32
-    MS = hkdf_expand(dHS, zero_bytes)
+    MS = hkdf_extract(dHS, zero_bytes)
     ClientSKH = sha256(nonce_c + X + nonce_s + Y + sigma + cert + mac_s + b"ClientEncK").digest()
     ServerSKH = sha256(nonce_c + X + nonce_s + Y + sigma + cert + mac_s + b"ServerEncK").digest()
     kc3 = hkdf_expand(MS, ClientSKH)

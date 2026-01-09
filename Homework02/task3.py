@@ -62,3 +62,23 @@ if __name__ == "__main__":
         print("KEM-TLS is faster on average.")
     else:
         print("PQ-TLS is faster on average.")
+
+# === PQ-TLS Handshake ===
+# Runs: 50
+# Mean time:   0.062958 seconds
+# Median time: 0.060038 seconds
+# Std dev:     0.016085 seconds
+# Min time:    0.037837 seconds
+# Max time:    0.113136 seconds
+#
+# === KEM-TLS Handshake ===
+# Runs: 50
+# Mean time:   0.034511 seconds
+# Median time: 0.032471 seconds
+# Std dev:     0.009125 seconds
+# Min time:    0.024489 seconds
+# Max time:    0.069242 seconds
+#
+# === Relative Comparison ===
+# PQ-TLS / KEM-TLS mean time ratio: 1.82x
+# KEM-TLS is faster on average.
