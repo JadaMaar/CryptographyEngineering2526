@@ -25,7 +25,7 @@ def opaque_demo():
     # ("Register", pw)
 
     s = random_z_q() # each user should have a unique salt
-    rw = H(pw.encode() + power(h(pw.encode()), s).to_bytes()) # iterate_hash_with_salt(pw, s, 10)# hashlib.sha256(pw.encode() + s).hexdigest()
+    rw = H(pw.encode() + power(h(pw.encode()), s).to_bytes())
     rw_key = KDF(rw)
     lpk_c, lsk_c = AKE_KeyGen()
     lpk_s, lsk_s = AKE_KeyGen()
@@ -35,18 +35,8 @@ def opaque_demo():
     print(f"lpk_c: {lpk_c}")
     print(f"lsk_c: {lsk_c}")
     print(f"lpk_s: {lpk_s}")
-    #pprint(client_key_info)
     enc_client_keys = AEAD_encrypt(rw_key, dict_to_bytes(client_key_info) )
 
-    # pprint(bytes_to_dict(dict_to_bytes(client_key_info)))
-
-    # Then the server store {
-    # user: Username // … as index
-    # salt: 𝒔
-    # server_k_bundle: 𝒍𝒑𝒌𝒄 , 𝒍𝒑𝒌𝒔 ,𝒍𝒔𝒌𝒔
-    # client_enc_k_bundle: enc_client_keys
-    # … // Auxiliary information
-    # } in the password database
     database[username] = {
         "user": username,
         "salt": s,
@@ -85,10 +75,22 @@ def opaque_demo():
     hp_pw_s = power(h_pw_a_s, a_inv)
     rw = H(pw.encode() + hp_pw_s.to_bytes())
     rw_key = KDF(rw)
-    client_key_info = AEAD_decrypt(rw_key, *client_enc_k_bundle)
-    client_key_info = bytes_to_dict(client_key_info)
+
+    try:
+        client_key_info = AEAD_decrypt(rw_key, *client_enc_k_bundle)
+        client_key_info = bytes_to_dict(client_key_info)
+    except:
+        print("Invalid Tag. Password was incorrect!")
+        exit(1)
     pprint(client_key_info)
 
+    # AKE Stage
+    epk_c, esk_c = AKE_KeyGen()
+
+    # client -> server
+    # epk_c
+
+    epk_s, esk_s = AKE_KeyGen()
 
 if __name__ == '__main__':
     opaque_demo()
