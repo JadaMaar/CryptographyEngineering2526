@@ -44,6 +44,9 @@ def AKE_KeyGen() -> tuple[Point, int]:
 def power(base: Point, exponent: int) -> Point:
     return exponent * base
 
+def inverse(x: int) -> int:
+    return pow(x, -1, Hash2Curve.n)
+
 def AEAD_encrypt(key: bytes, data: bytes) -> bytes:
     return aes_gcm_encrypt(key, data, b"")
 
