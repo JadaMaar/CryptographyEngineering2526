@@ -105,9 +105,9 @@ def opaque_demo():
     # server -> client
     # epk_s
 
-    a = lsk_c
+    a = client_key_info["lsk_c"]
     x = esk_c
-    B = lpk_s
+    B = client_key_info["lpk_s"]
     Y = epk_s
     SK_client = KClient(a, x, B, Y)
     print("SK Client: " + SK_client.hex())
