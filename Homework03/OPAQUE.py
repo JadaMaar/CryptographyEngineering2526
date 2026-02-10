@@ -1,6 +1,7 @@
 import hashlib
 import os
 from opaque_utils import *
+from tls_helper import *
 import base64
 from Hash2Curve import Hash2Curve
 from pprint import pprint
@@ -82,7 +83,10 @@ def opaque_demo():
     except:
         print("Invalid Tag. Password was incorrect!")
         exit(1)
-    pprint(client_key_info)
+
+    print(f"lpk_c: {client_key_info["lpk_c"]}")
+    print(f"lsk_c: {client_key_info["lsk_c"]}")
+    print(f"lpk_s: {client_key_info["lpk_s"]}\n")
 
     # AKE Stage
     epk_c, esk_c = AKE_KeyGen()
@@ -91,6 +95,42 @@ def opaque_demo():
     # epk_c
 
     epk_s, esk_s = AKE_KeyGen()
+    b = lsk_s
+    y = esk_s
+    A = lpk_c
+    X = epk_c
+    SK_server = KServer(b, y, A, X)
+    print("SK Server: " + SK_server.hex())
+
+    # server -> client
+    # epk_s
+
+    a = lsk_c
+    x = esk_c
+    B = lpk_s
+    Y = epk_s
+    SK_client = KClient(a, x, B, Y)
+    print("SK Client: " + SK_client.hex())
+
+    key = hkdf_expand(SK_client, b"Key Confirmation", 32 * 2)
+    ClientK_c, ClientK_s = key[:32], key[32:]
+    client_mac_c = HMAC(ClientK_c, b"Client KC")
+    client_mac_s = HMAC(ClientK_s, b"Server KS")
+
+    # client -> server
+    # client_mac_c
+
+    key = hkdf_expand(SK_server, b"Key Confirmation", 32 * 2)
+    ServerK_c, ServerK_s = key[:32], key[32:]
+    server_mac_c = HMAC(ServerK_c, b"Client KC")
+    server_mac_s = HMAC(ServerK_s, b"Server KS")
+
+    assert server_mac_c == client_mac_c
+
+    # server -> client
+    # server_mac_s
+
+    assert client_mac_s == server_mac_s
 
 if __name__ == '__main__':
     opaque_demo()

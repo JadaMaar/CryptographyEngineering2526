@@ -41,6 +41,20 @@ def AKE_KeyGen() -> tuple[Point, int]:
 
     return Point.from_bytes(Hash2Curve.P256.curve, public_key.to_bytes()), private_key
 
+def KServer(b, y, A, X):
+    t1 = power(X, b).to_bytes()
+    t2 = power(X, y).to_bytes()
+    t3 = power(A, y).to_bytes()
+    SK = hkdf_extract(None, t1+t2+t3)
+    return SK
+
+def KClient(a, x, B, Y):
+    t1 = power(B, x).to_bytes()
+    t2 = power(Y, x).to_bytes()
+    t3 = power(Y, a).to_bytes()
+    SK = hkdf_extract(None, t1+t2+t3)
+    return SK
+
 def power(base: Point, exponent: int) -> Point:
     return exponent * base
 
